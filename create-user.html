@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create User - UPHSD Grading System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="shared.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div id="sidebar"></div>
+    <div id="header"></div>
+
+    <main class="ml-64 mt-24 p-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-[#800000] mb-2">Create New User</h1>
+            <p class="text-gray-600 border-l-4 border-[#FFD700] pl-4">Register a new user account in the system</p>
+        </div>
+
+        <div class="max-w-2xl">
+            <div class="card">
+                <form onsubmit="handleCreateUser(event)">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">First Name *</label>
+                            <input type="text" id="firstName" class="focus-ring w-full px-4 py-3 border-2 border-gray-300 rounded-lg" placeholder="Enter first name" required>
+                            <div class="error-message" id="firstNameError"></div>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Last Name *</label>
+                            <input type="text" id="lastName" class="focus-ring w-full px-4 py-3 border-2 border-gray-300 rounded-lg" placeholder="Enter last name" required>
+                            <div class="error-message" id="lastNameError"></div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <label class="block text-gray-700 font-semibold mb-2">Email Address *</label>
+                        <input type="email" id="email" class="focus-ring w-full px-4 py-3 border-2 border-gray-300 rounded-lg" placeholder="Enter email address" required>
+                        <div class="error-message" id="emailError"></div>
+                    </div>
+
+                    <div class="mt-6">
+                        <label class="block text-gray-700 font-semibold mb-2">Institutional ID *</label>
+                        <input type="text" id="institutionalId" class="focus-ring w-full px-4 py-3 border-2 border-gray-300 rounded-lg" placeholder="Enter institutional ID" required>
+                        <div class="error-message" id="idError"></div>
+                    </div>
+
+                    <div class="mt-6">
+                        <label class="block text-gray-700 font-semibold mb-2">Role *</label>
+                        <select id="role" class="focus-ring w-full px-4 py-3 border-2 border-gray-300 rounded-lg" required>
+                            <option value="">-- Select a role --</option>
+                            <option value="admin">Administrator</option>
+                            <option value="faculty">Faculty Member</option>
+                            <option value="supervisor">Supervisor</option>
+                        </select>
+                        <div class="error-message" id="roleError"></div>
+                    </div>
+
+                    <div class="mt-6">
+                        <label class="block text-gray-700 font-semibold mb-2">Department *</label>
+                        <select id="department" class="focus-ring w-full px-4 py-3 border-2 border-gray-300 rounded-lg" required>
+                            <option value="">-- Select a department --</option>
+                            <option value="ccs">College of Computer Studies</option>
+                            <option value="coe">College of Engineering</option>
+                            <option value="cas">College of Arts and Sciences</option>
+                            <option value="cba">College of Business Administration</option>
+                        </select>
+                        <div class="error-message" id="departmentError"></div>
+                    </div>
+
+                    <div class="mt-6">
+                        <label class="block text-gray-700 font-semibold mb-2">Temporary Password *</label>
+                        <input type="text" id="tempPassword" class="focus-ring w-full px-4 py-3 border-2 border-gray-300 rounded-lg" placeholder="Auto-generated password" disabled value="UPHSD@2025">
+                        <p class="text-sm text-gray-600 mt-2">User will be prompted to change password on first login</p>
+                    </div>
+
+                    <div class="mt-8 flex gap-4">
+                        <button type="button" onclick="discardChanges()" class="flex-1 btn-secondary">
+                            ✕ Discard Changes
+                        </button>
+                        <button type="submit" class="flex-1 btn-primary">
+                            ✓ Create User
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Check authentication
+        const role = checkAuth();
+        if (role !== ROLES.ADMIN) {
+            window.location.href = 'index.html';
+        }
+
+        // Initialize page
+        document.getElementById('sidebar').innerHTML = getSidebarHTML(role, 'create');
+        document.getElementById('header').innerHTML = getHeaderHTML(role);
+
+        function validateForm() {
+            let isValid = true;
+            const inputs = {
+                firstName: document.getElementById('firstName'),
+                lastName: document.getElementById('lastName'),
+                email: document.getElementById('email'),
+                institutionalId: document.getElementById('institutionalId'),
+                role: document.getElementById('role'),
+                department: document.getElementById('department')
+            };
+
+            // Clear previous errors
+            Object.keys(inputs).forEach(key => {
+                inputs[key].classList.remove('error-input');
+                if (document.getElementById(key + 'Error')) {
+                    document.getElementById(key + 'Error').textContent = '';
+                }
+            });
+
+            // Validate first name
+            if (!inputs.firstName.value.trim()) {
+                inputs.firstName.classList.add('error-input');
+                document.getElementById('firstNameError').textContent = 'First name is required';
+                isValid = false;
+            }
+
+            // Validate last name
+            if (!inputs.lastName.value.trim()) {
+                inputs.lastName.classList.add('error-input');
+                document.getElementById('lastNameError').textContent = 'Last name is required';
+                isValid = false;
+            }
+
+            // Validate email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(inputs.email.value)) {
+                inputs.email.classList.add('error-input');
+                document.getElementById('emailError').textContent = 'Please enter a valid email address';
+                isValid = false;
+            }
+
+            // Validate institutional ID
+            if (!inputs.institutionalId.value.trim()) {
+                inputs.institutionalId.classList.add('error-input');
+                document.getElementById('idError').textContent = 'Institutional ID is required';
+                isValid = false;
+            }
+
+            // Validate role
+            if (!inputs.role.value) {
+                inputs.role.classList.add('error-input');
+                document.getElementById('roleError').textContent = 'Please select a role';
+                isValid = false;
+            }
+
+            // Validate department
+            if (!inputs.department.value) {
+                inputs.department.classList.add('error-input');
+                document.getElementById('departmentError').textContent = 'Please select a department';
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function handleCreateUser(event) {
+            event.preventDefault();
+            
+            if (!validateForm()) {
+                showError('Please fix the errors above');
+                return;
+            }
+
+            showConfirmation(
+                'Create User',
+                'Are you sure you want to create this user account?',
+                'confirmCreateUser'
+            );
+        }
+
+        function confirmCreateUser() {
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
+            const role = document.getElementById('role').value;
+
+            // Simulate user creation
+            showSuccess(`User "${firstName} ${lastName}" created successfully!`);
+            
+            setTimeout(() => {
+                window.location.href = 'user-management.html';
+            }, 2000);
+        }
+
+        function discardChanges() {
+            showConfirmation(
+                'Discard Changes',
+                'Are you sure you want to discard all changes?',
+                'confirmDiscard'
+            );
+        }
+
+        function confirmDiscard() {
+            window.location.href = 'user-management.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade Encoding - UPHSD Grading System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="shared.js"></script>
+    <style>
+        .grade-grid {
+            overflow-x: auto;
+        }
+        .grade-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .grade-table thead {
+            background-color: #800000;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        .grade-table th {
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            border: 1px solid #ddd;
+        }
+        .grade-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .grade-table tbody tr:hover {
+            background-color: #f9f9f9;
+        }
+        .grade-input {
+            width: 100%;
+            padding: 6px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .grade-input:focus {
+            outline: 3px solid #FFD700;
+            border-color: #FFD700;
+        }
+        .grade-input.error {
+            border-color: #ef4444;
+            background-color: #fee2e2;
+        }
+        .grade-computed {
+            background-color: #f0f0f0;
+            font-weight: bold;
+            color: #333;
+        }
+        .grade-passed {
+            background-color: #d1fae5;
+            color: #065f46;
+            font-weight: bold;
+        }
+        .grade-failed {
+            background-color: #fee2e2;
+            color: #991b1b;
+            font-weight: bold;
+        }
+        .error-tooltip {
+            color: #ef4444;
+            font-size: 11px;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="sidebar"></div>
+    <div id="header"></div>
+
+    <main class="ml-64 mt-24 p-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-[#800000] mb-2">Grade Encoding</h1>
+            <p class="text-gray-600 border-l-4 border-[#FFD700] pl-4">Human Computer Interaction 1 (Semester 2025-2026)</p>
+        </div>
+
+        <!-- Instructions -->
+        <div class="card mb-6">
+            <p class="text-gray-700 mb-2"><span class="font-semibold">Instructions:</span> Enter grades for each component. Grades must be between 0-100. The system will automatically calculate the Final Transmutation Grade based on: Class Performance (70%) + Major Exam (30%).</p>
+            <p class="text-sm text-gray-600 mt-2">Class Performance = Average of (Attendance, Class Participation, Quizzes/Exercises, Assignment, Project)</p>
+        </div>
+
+        <!-- Grade Encoding Table -->
+        <div class="card grade-grid">
+            <table class="grade-table">
+                <thead>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Student Name</th>
+                        <th>Attendance</th>
+                        <th>Class Participation</th>
+                        <th>Quizzes/Exercises</th>
+                        <th>Assignment</th>
+                        <th>Project</th>
+                        <th>Class Performance</th>
+                        <th>Major Exam</th>
+                        <th>Final Grade</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody id="gradeTableBody">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-6 flex gap-4">
+            <button onclick="saveGrades()" class="btn-primary">💾 Save Grades</button>
+            <button onclick="discardGrades()" class="btn-secondary">✕ Discard Changes</button>
+            <button onclick="exportGrades()" class="btn-primary">📥 Export Grades</button>
+        </div>
+    </main>
+
+    <script>
+        // Check authentication
+        const role = checkAuth();
+        if (role !== ROLES.FACULTY) {
+            window.location.href = 'index.html';
+        }
+
+        // Initialize page
+        document.getElementById('sidebar').innerHTML = getSidebarHTML(role, 'grades');
+        document.getElementById('header').innerHTML = getHeaderHTML(role);
+
+        // Grade data
+        let gradeData = [
+            {
+                id: 'STU001',
+                name: 'ANDAYA, JOHN BENEDICT G.',
+                attendance: 83,
+                participation: 100,
+                quizzes: 90,
+                assignment: 90,
+                project: 100,
+                majorExam: 95
+            },
+            {
+                id: 'STU002',
+                name: 'ARNAIZ, SAMUEL ANGELO M.',
+                attendance: 90,
+                participation: 90,
+                quizzes: 80,
+                assignment: 80,
+                project: 90,
+                majorExam: 80
+            },
+            {
+                id: 'STU003',
+                name: 'BAGAYAS, BOBSON ROB V.',
+                attendance: 83,
+                participation: 80,
+                quizzes: 70,
+                assignment: 70,
+                project: 80,
+                majorExam: 70
+            }
+        ];
+
+        // Render grade table
+        function renderGradeTable() {
+            const tbody = document.getElementById('gradeTableBody');
+            tbody.innerHTML = gradeData.map((student, index) => {
+                const calc = calculateFinalGrade(
+                    student.attendance,
+                    student.participation,
+                    student.quizzes,
+                    student.assignment,
+                    student.project,
+                    student.majorExam
+                );
+
+                return `
+                    <tr>
+                        <td>${student.id}</td>
+                        <td style="text-align: left;">${student.name}</td>
+                        <td>
+                            <input type="number" class="grade-input" min="0" max="100" value="${student.attendance}" 
+                                   onchange="updateGrade(${index}, 'attendance', this.value)" 
+                                   onkeyup="validateGradeInput(this)">
+                        </td>
+                        <td>
+                            <input type="number" class="grade-input" min="0" max="100" value="${student.participation}" 
+                                   onchange="updateGrade(${index}, 'participation', this.value)"
+                                   onkeyup="validateGradeInput(this)">
+                        </td>
+                        <td>
+                            <input type="number" class="grade-input" min="0" max="100" value="${student.quizzes}" 
+                                   onchange="updateGrade(${index}, 'quizzes', this.value)"
+                                   onkeyup="validateGradeInput(this)">
+                        </td>
+                        <td>
+                            <input type="number" class="grade-input" min="0" max="100" value="${student.assignment}" 
+                                   onchange="updateGrade(${index}, 'assignment', this.value)"
+                                   onkeyup="validateGradeInput(this)">
+                        </td>
+                        <td>
+                            <input type="number" class="grade-input" min="0" max="100" value="${student.project}" 
+                                   onchange="updateGrade(${index}, 'project', this.value)"
+                                   onkeyup="validateGradeInput(this)">
+                        </td>
+                        <td class="grade-computed">${calc.classPerformance}</td>
+                        <td>
+                            <input type="number" class="grade-input" min="0" max="100" value="${student.majorExam}" 
+                                   onchange="updateGrade(${index}, 'majorExam', this.value)"
+                                   onkeyup="validateGradeInput(this)">
+                        </td>
+                        <td class="grade-computed">${calc.finalGrade}</td>
+                        <td class="${calc.remarks === 'Passed' ? 'grade-passed' : 'grade-failed'}">
+                            ${calc.remarks}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function validateGradeInput(input) {
+            const value = parseInt(input.value);
+            if (isNaN(value) || value < 0 || value > 100) {
+                input.classList.add('error');
+            } else {
+                input.classList.remove('error');
+            }
+        }
+
+        function updateGrade(index, field, value) {
+            const numValue = parseInt(value);
+            if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
+                gradeData[index][field] = numValue;
+                renderGradeTable();
+            }
+        }
+
+        function saveGrades() {
+            // Validate all grades
+            let hasError = false;
+            gradeData.forEach(student => {
+                if (student.attendance < 0 || student.attendance > 100 ||
+                    student.participation < 0 || student.participation > 100 ||
+                    student.quizzes < 0 || student.quizzes > 100 ||
+                    student.assignment < 0 || student.assignment > 100 ||
+                    student.project < 0 || student.project > 100 ||
+                    student.majorExam < 0 || student.majorExam > 100) {
+                    hasError = true;
+                }
+            });
+
+            if (hasError) {
+                showError('Please fix invalid grades (must be 0-100)');
+                return;
+            }
+
+            showConfirmation(
+                'Save Grades',
+                'Are you sure you want to save all grades? This action cannot be undone.',
+                'confirmSaveGrades'
+            );
+        }
+
+        function confirmSaveGrades() {
+            showSuccess('Grades saved successfully!');
+            setTimeout(() => {
+                window.location.href = 'faculty-dashboard.html';
+            }, 2000);
+        }
+
+        function discardGrades() {
+            showConfirmation(
+                'Discard Changes',
+                'Are you sure you want to discard all changes?',
+                'confirmDiscardGrades'
+            );
+        }
+
+        function confirmDiscardGrades() {
+            window.location.href = 'faculty-dashboard.html';
+        }
+
+        function exportGrades() {
+            let csv = 'Student ID,Student Name,Attendance,Class Participation,Quizzes,Assignment,Project,Class Performance,Major Exam,Final Grade,Remarks\n';
+            
+            gradeData.forEach(student => {
+                const calc = calculateFinalGrade(
+                    student.attendance,
+                    student.participation,
+                    student.quizzes,
+                    student.assignment,
+                    student.project,
+                    student.majorExam
+                );
+                csv += `"${student.id}","${student.name}",${student.attendance},${student.participation},${student.quizzes},${student.assignment},${student.project},${calc.classPerformance},${student.majorExam},${calc.finalGrade},"${calc.remarks}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'grades-export.csv';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            showSuccess('Grades exported successfully!');
+        }
+
+        // Keyboard navigation support
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                // Tab key navigation is supported natively
+            }
+        });
+
+        // Initial render
+        renderGradeTable();
+    </script>
+</body>
+</html>

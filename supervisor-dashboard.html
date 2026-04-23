@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supervisor Dashboard - UPHSD Grading System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="shared.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div id="sidebar"></div>
+    <div id="header"></div>
+
+    <main class="ml-64 mt-24 p-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-[#800000] mb-2">Supervisor Dashboard</h1>
+            <p class="text-gray-600 border-l-4 border-[#FFD700] pl-4">Department overview and management</p>
+        </div>
+
+        <!-- Department Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="card">
+                <div class="text-4xl font-bold text-[#800000] mb-2">8</div>
+                <div class="card-title text-base">Faculty Members</div>
+                <p class="text-sm text-gray-600">Active instructors</p>
+            </div>
+            <div class="card">
+                <div class="text-4xl font-bold text-[#800000] mb-2">24</div>
+                <div class="card-title text-base">Assigned Subjects</div>
+                <p class="text-sm text-gray-600">Current semester</p>
+            </div>
+            <div class="card">
+                <div class="text-4xl font-bold text-[#800000] mb-2">487</div>
+                <div class="card-title text-base">Total Students</div>
+                <p class="text-sm text-gray-600">Enrolled students</p>
+            </div>
+            <div class="card">
+                <div class="text-4xl font-bold text-[#800000] mb-2">3</div>
+                <div class="card-title text-base">Pending Tasks</div>
+                <p class="text-sm text-gray-600">Require attention</p>
+            </div>
+        </div>
+
+        <!-- Department Alerts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="card">
+                <div class="card-title">⚠️ Pending Alerts</div>
+                <div class="space-y-3">
+                    <div class="p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+                        <p class="font-semibold text-gray-800">Grade Submission Deadline</p>
+                        <p class="text-sm text-gray-600">2 faculty members haven't submitted grades yet</p>
+                    </div>
+                    <div class="p-3 bg-blue-50 border-l-4 border-blue-400 rounded">
+                        <p class="font-semibold text-gray-800">Subject Assignment Pending</p>
+                        <p class="text-sm text-gray-600">3 subjects need faculty assignment</p>
+                    </div>
+                    <div class="p-3 bg-green-50 border-l-4 border-green-400 rounded">
+                        <p class="font-semibold text-gray-800">System Status</p>
+                        <p class="text-sm text-gray-600">All systems operational</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📊 Department Summary</div>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">Average Class Size</span>
+                        <span class="font-bold text-[#800000]">20.3 students</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">Grade Submission Rate</span>
+                        <span class="font-bold text-[#800000]">75%</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">Faculty Utilization</span>
+                        <span class="font-bold text-[#800000]">100%</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">Student Pass Rate</span>
+                        <span class="font-bold text-[#800000]">88%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="card-title">Quick Actions</div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <a href="assign-subject.html" class="block btn-primary text-center">📌 Assign Subject</a>
+                <a href="faculty-roster.html" class="block btn-primary text-center">👨‍💼 Faculty Roster</a>
+                <a href="department-subjects.html" class="block btn-primary text-center">🏢 Department Subjects</a>
+                <button onclick="logout()" class="block bg-red-600 text-white font-bold py-3 rounded-lg hover:bg-red-700 transition">🚪 Logout</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Check authentication
+        const role = checkAuth();
+        if (role !== ROLES.SUPERVISOR) {
+            window.location.href = 'index.html';
+        }
+
+        // Initialize page
+        document.getElementById('sidebar').innerHTML = getSidebarHTML(role, 'dashboard');
+        document.getElementById('header').innerHTML = getHeaderHTML(role);
+    </script>
+</body>
+</html>

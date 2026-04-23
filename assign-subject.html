@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assign Subject - UPHSD Grading System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="shared.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div id="sidebar"></div>
+    <div id="header"></div>
+
+    <main class="ml-64 mt-24 p-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-[#800000] mb-2">Assign Subject to Faculty</h1>
+            <p class="text-gray-600 border-l-4 border-[#FFD700] pl-4">Manage subject assignments for faculty members</p>
+        </div>
+
+        <div class="max-w-2xl">
+            <div class="card">
+                <form onsubmit="handleAssignSubject(event)">
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">Select Faculty Member *</label>
+                        <select id="faculty" class="focus-ring w-full px-4 py-3 border-2 border-gray-300 rounded-lg" required>
+                            <option value="">-- Choose a faculty member --</option>
+                            <option value="FAC001">Prof. Juan Dela Cruz</option>
+                            <option value="FAC002">Prof. Carlos Mendoza</option>
+                            <option value="FAC003">Dr. Patricia Reyes</option>
+                            <option value="FAC004">Prof. Maria Santos</option>
+                        </select>
+                    </div>
+
+                    <div class="mt-6">
+                        <label class="block text-gray-700 font-semibold mb-2">Select Subject *</label>
+                        <select id="subject" class="focus-ring w-full px-4 py-3 border-2 border-gray-300 rounded-lg" required>
+                            <option value="">-- Choose a subject --</option>
+                            <option value="HCI-1">Human Computer Interaction 1</option>
+                            <option value="WEB-1">Web Development Fundamentals</option>
+                            <option value="DBS-1">Database Management Systems</option>
+                            <option value="SE-1">Software Engineering</option>
+                            <option value="AI-1">Artificial Intelligence Basics</option>
+                        </select>
+                    </div>
+
+                    <div class="mt-6">
+                        <label class="block text-gray-700 font-semibold mb-2">Schedule *</label>
+                        <input type="text" id="schedule" class="focus-ring w-full px-4 py-3 border-2 border-gray-300 rounded-lg" placeholder="e.g., MWF 10:00 AM - 11:30 AM" required>
+                    </div>
+
+                    <div class="mt-6">
+                        <label class="block text-gray-700 font-semibold mb-2">Room *</label>
+                        <input type="text" id="room" class="focus-ring w-full px-4 py-3 border-2 border-gray-300 rounded-lg" placeholder="e.g., Computer Lab 201" required>
+                    </div>
+
+                    <div class="mt-6">
+                        <label class="block text-gray-700 font-semibold mb-2">Semester/Year *</label>
+                        <input type="text" id="semester" class="focus-ring w-full px-4 py-3 border-2 border-gray-300 rounded-lg" placeholder="e.g., 2025-2026" required>
+                    </div>
+
+                    <div class="mt-6">
+                        <label class="block text-gray-700 font-semibold mb-2">Capacity *</label>
+                        <input type="number" id="capacity" class="focus-ring w-full px-4 py-3 border-2 border-gray-300 rounded-lg" placeholder="Maximum students" min="1" required>
+                    </div>
+
+                    <div class="mt-8 flex gap-4">
+                        <button type="button" onclick="discardChanges()" class="flex-1 btn-secondary">
+                            ✕ Discard Changes
+                        </button>
+                        <button type="submit" class="flex-1 btn-primary">
+                            ✓ Assign Subject
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Current Assignments -->
+        <div class="mt-8 card overflow-x-auto">
+            <div class="card-title mb-4">Current Subject Assignments</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Faculty</th>
+                        <th>Subject</th>
+                        <th>Schedule</th>
+                        <th>Room</th>
+                        <th>Capacity</th>
+                        <th>Semester</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Prof. Juan Dela Cruz</td>
+                        <td>Human Computer Interaction 1</td>
+                        <td>MWF 10:00 AM - 11:30 AM</td>
+                        <td>Computer Lab 201</td>
+                        <td>42</td>
+                        <td>2025-2026</td>
+                        <td><button onclick="unassignSubject()" class="text-red-600 hover:underline font-semibold">Unassign</button></td>
+                    </tr>
+                    <tr>
+                        <td>Prof. Carlos Mendoza</td>
+                        <td>Web Development Fundamentals</td>
+                        <td>TTh 1:00 PM - 2:30 PM</td>
+                        <td>Computer Lab 301</td>
+                        <td>38</td>
+                        <td>2025-2026</td>
+                        <td><button onclick="unassignSubject()" class="text-red-600 hover:underline font-semibold">Unassign</button></td>
+                    </tr>
+                    <tr>
+                        <td>Dr. Patricia Reyes</td>
+                        <td>Database Management Systems</td>
+                        <td>MWF 2:00 PM - 3:30 PM</td>
+                        <td>Computer Lab 102</td>
+                        <td>35</td>
+                        <td>2025-2026</td>
+                        <td><button onclick="unassignSubject()" class="text-red-600 hover:underline font-semibold">Unassign</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        // Check authentication
+        const role = checkAuth();
+        if (role !== ROLES.SUPERVISOR) {
+            window.location.href = 'index.html';
+        }
+
+        // Initialize page
+        document.getElementById('sidebar').innerHTML = getSidebarHTML(role, 'assign');
+        document.getElementById('header').innerHTML = getHeaderHTML(role);
+
+        function handleAssignSubject(event) {
+            event.preventDefault();
+            const faculty = document.getElementById('faculty').value;
+            const subject = document.getElementById('subject').value;
+            const schedule = document.getElementById('schedule').value;
+            const room = document.getElementById('room').value;
+            const semester = document.getElementById('semester').value;
+            const capacity = document.getElementById('capacity').value;
+
+            showConfirmation(
+                'Assign Subject',
+                'Are you sure you want to assign this subject to the selected faculty member?',
+                'confirmAssign'
+            );
+        }
+
+        function confirmAssign() {
+            showSuccess('Subject assigned successfully!');
+            document.getElementById('faculty').value = '';
+            document.getElementById('subject').value = '';
+            document.getElementById('schedule').value = '';
+            document.getElementById('room').value = '';
+            document.getElementById('semester').value = '';
+            document.getElementById('capacity').value = '';
+        }
+
+        function unassignSubject() {
+            showConfirmation(
+                'Unassign Subject',
+                'Are you sure you want to unassign this subject?',
+                'confirmUnassign'
+            );
+        }
+
+        function confirmUnassign() {
+            showSuccess('Subject unassigned successfully!');
+            location.reload();
+        }
+
+        function discardChanges() {
+            showConfirmation(
+                'Discard Changes',
+                'Are you sure you want to discard all changes?',
+                'confirmDiscard'
+            );
+        }
+
+        function confirmDiscard() {
+            window.location.href = 'supervisor-dashboard.html';
+        }
+    </script>
+</body>
+</html>

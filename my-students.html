@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Students - UPHSD Grading System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="shared.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div id="sidebar"></div>
+    <div id="header"></div>
+
+    <main class="ml-64 mt-24 p-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-[#800000] mb-2">My Students</h1>
+            <p class="text-gray-600 border-l-4 border-[#FFD700] pl-4">Class roster for Human Computer Interaction 1</p>
+        </div>
+
+        <!-- View Toggle and Search -->
+        <div class="mb-6 flex gap-2 flex-wrap">
+            <button onclick="switchView('list')" id="listViewBtn" class="btn-primary">📋 List View</button>
+            <button onclick="switchView('grid')" id="gridViewBtn" class="btn-secondary">🎯 Grid View</button>
+            <input type="text" id="searchInput" placeholder="Search by ID or name..." class="focus-ring flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg">
+        </div>
+
+        <!-- List View -->
+        <div id="listView" class="card overflow-x-auto">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Enrollment Date</th>
+                    </tr>
+                </thead>
+                <tbody id="studentTableBody">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Grid View -->
+        <div id="gridView" class="hidden grid-view">
+            <!-- Populated by JavaScript -->
+        </div>
+    </main>
+
+    <script>
+        // Check authentication
+        const role = checkAuth();
+        if (role !== ROLES.FACULTY) {
+            window.location.href = 'index.html';
+        }
+
+        // Initialize page
+        document.getElementById('sidebar').innerHTML = getSidebarHTML(role, 'students');
+        document.getElementById('header').innerHTML = getHeaderHTML(role);
+
+        // Sample student data
+        let students = [
+            { id: 'STU001', name: 'ANDAYA, JOHN BENEDICT G.', email: 'andaya.jbg@uphsd.edu', status: 'Active', enrollmentDate: '2025-01-10' },
+            { id: 'STU002', name: 'ARNAIZ, SAMUEL ANGELO M.', email: 'arnaiz.sam@uphsd.edu', status: 'Active', enrollmentDate: '2025-01-10' },
+            { id: 'STU003', name: 'BAGAYAS, BOBSON ROB V.', email: 'bagayas.brv@uphsd.edu', status: 'Active', enrollmentDate: '2025-01-10' },
+            { id: 'STU004', name: 'CABRERA, MARIA SANTOS', email: 'cabrera.ms@uphsd.edu', status: 'Active', enrollmentDate: '2025-01-10' },
+            { id: 'STU005', name: 'DELA CRUZ, JUAN CARLOS', email: 'delacruz.jc@uphsd.edu', status: 'Active', enrollmentDate: '2025-01-11' },
+            { id: 'STU006', name: 'FERNANDEZ, PATRICIA ANN', email: 'fernandez.pa@uphsd.edu', status: 'Active', enrollmentDate: '2025-01-11' },
+            { id: 'STU007', name: 'GARCIA, ANTONIO LUIS', email: 'garcia.al@uphsd.edu', status: 'Active', enrollmentDate: '2025-01-12' },
+            { id: 'STU008', name: 'HERNANDEZ, ROSA MARIE', email: 'hernandez.rm@uphsd.edu', status: 'Active', enrollmentDate: '2025-01-12' },
+        ];
+
+        // Render students
+        function renderStudents(data = students) {
+            renderListView(data);
+            renderGridView(data);
+        }
+
+        function renderListView(data) {
+            const tbody = document.getElementById('studentTableBody');
+            tbody.innerHTML = data.map(student => `
+                <tr>
+                    <td>${student.id}</td>
+                    <td>${student.name}</td>
+                    <td>${student.email}</td>
+                    <td><span class="status-badge status-passed">✓ ${student.status}</span></td>
+                    <td>${student.enrollmentDate}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderGridView(data) {
+            const gridView = document.getElementById('gridView');
+            gridView.innerHTML = data.map(student => `
+                <div class="profile-card">
+                    <img src="https://placehold.co/80x80/800000/FFFFFF?text=${student.id.substring(3)}" alt="${student.name}">
+                    <div class="profile-card-name">${student.name}</div>
+                    <div class="profile-card-id">${student.id}</div>
+                    <div class="text-sm text-gray-600 mb-3">${student.email}</div>
+                    <div class="text-sm mb-3">
+                        <span class="status-badge status-passed">✓ ${student.status}</span>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        Enrolled: ${student.enrollmentDate}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function switchView(view) {
+            const listView = document.getElementById('listView');
+            const gridView = document.getElementById('gridView');
+            const listBtn = document.getElementById('listViewBtn');
+            const gridBtn = document.getElementById('gridViewBtn');
+
+            if (view === 'list') {
+                listView.classList.remove('hidden');
+                gridView.classList.add('hidden');
+                listBtn.classList.add('btn-primary');
+                listBtn.classList.remove('btn-secondary');
+                gridBtn.classList.remove('btn-primary');
+                gridBtn.classList.add('btn-secondary');
+            } else {
+                listView.classList.add('hidden');
+                gridView.classList.remove('hidden');
+                listBtn.classList.remove('btn-primary');
+                listBtn.classList.add('btn-secondary');
+                gridBtn.classList.add('btn-primary');
+                gridBtn.classList.remove('btn-secondary');
+            }
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filtered = students.filter(student =>
+                student.id.toLowerCase().includes(searchTerm) ||
+                student.name.toLowerCase().includes(searchTerm)
+            );
+            renderStudents(filtered);
+        });
+
+        // Initial render
+        renderStudents();
+    </script>
+</body>
+</html>

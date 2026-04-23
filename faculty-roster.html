@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Roster - UPHSD Grading System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="shared.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div id="sidebar"></div>
+    <div id="header"></div>
+
+    <main class="ml-64 mt-24 p-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-[#800000] mb-2">Faculty Roster & Oversight</h1>
+            <p class="text-gray-600 border-l-4 border-[#FFD700] pl-4">Read-only view of faculty assignments and grade records</p>
+        </div>
+
+        <!-- Access Restriction Notice -->
+        <div class="card mb-6 bg-blue-50 border-l-4 border-blue-400">
+            <p class="text-blue-800 font-semibold">ℹ️ Read-Only Access</p>
+            <p class="text-blue-700 text-sm mt-1">You have view-only access to this data. Grade editing is restricted to faculty members. Contact administration if you need to modify records.</p>
+        </div>
+
+        <!-- Faculty Overview Table -->
+        <div class="card overflow-x-auto">
+            <div class="card-title mb-4">Faculty Members & Assignments</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Faculty ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Department</th>
+                        <th>Assigned Subjects</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>FAC001</td>
+                        <td>Prof. Juan Dela Cruz</td>
+                        <td>juan.delacruz@uphsd.edu</td>
+                        <td>College of Computer Studies</td>
+                        <td>
+                            <div class="text-sm">
+                                <div>• Human Computer Interaction 1</div>
+                                <div>• Software Engineering</div>
+                            </div>
+                        </td>
+                        <td><span class="status-badge status-passed">✓ Active</span></td>
+                    </tr>
+                    <tr>
+                        <td>FAC002</td>
+                        <td>Prof. Carlos Mendoza</td>
+                        <td>carlos.mendoza@uphsd.edu</td>
+                        <td>College of Computer Studies</td>
+                        <td>
+                            <div class="text-sm">
+                                <div>• Web Development Fundamentals</div>
+                                <div>• Database Management Systems</div>
+                            </div>
+                        </td>
+                        <td><span class="status-badge status-passed">✓ Active</span></td>
+                    </tr>
+                    <tr>
+                        <td>FAC003</td>
+                        <td>Dr. Patricia Reyes</td>
+                        <td>patricia.reyes@uphsd.edu</td>
+                        <td>College of Computer Studies</td>
+                        <td>
+                            <div class="text-sm">
+                                <div>• Artificial Intelligence Basics</div>
+                                <div>• Data Structures</div>
+                            </div>
+                        </td>
+                        <td><span class="status-badge status-passed">✓ Active</span></td>
+                    </tr>
+                    <tr>
+                        <td>FAC004</td>
+                        <td>Prof. Maria Santos</td>
+                        <td>maria.santos@uphsd.edu</td>
+                        <td>College of Computer Studies</td>
+                        <td>
+                            <div class="text-sm">
+                                <div>• Computer Networks</div>
+                                <div>• System Administration</div>
+                            </div>
+                        </td>
+                        <td><span class="status-badge status-passed">✓ Active</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Grade Records Overview -->
+        <div class="card mt-8 overflow-x-auto">
+            <div class="card-title mb-4">Grade Submission Status</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Faculty</th>
+                        <th>Subject</th>
+                        <th>Total Students</th>
+                        <th>Grades Submitted</th>
+                        <th>Completion %</th>
+                        <th>Last Updated</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Prof. Juan Dela Cruz</td>
+                        <td>Human Computer Interaction 1</td>
+                        <td>42</td>
+                        <td>42</td>
+                        <td>100%</td>
+                        <td>2025-01-15 14:32</td>
+                        <td><span class="status-badge status-passed">✓ Complete</span></td>
+                    </tr>
+                    <tr>
+                        <td>Prof. Juan Dela Cruz</td>
+                        <td>Software Engineering</td>
+                        <td>38</td>
+                        <td>35</td>
+                        <td>92%</td>
+                        <td>2025-01-15 10:15</td>
+                        <td><span class="status-badge status-passed">✓ In Progress</span></td>
+                    </tr>
+                    <tr>
+                        <td>Prof. Carlos Mendoza</td>
+                        <td>Web Development Fundamentals</td>
+                        <td>38</td>
+                        <td>38</td>
+                        <td>100%</td>
+                        <td>2025-01-14 16:45</td>
+                        <td><span class="status-badge status-passed">✓ Complete</span></td>
+                    </tr>
+                    <tr>
+                        <td>Prof. Carlos Mendoza</td>
+                        <td>Database Management Systems</td>
+                        <td>35</td>
+                        <td>20</td>
+                        <td>57%</td>
+                        <td>2025-01-13 09:30</td>
+                        <td><span class="status-badge status-failed">⚠ Pending</span></td>
+                    </tr>
+                    <tr>
+                        <td>Dr. Patricia Reyes</td>
+                        <td>Artificial Intelligence Basics</td>
+                        <td>40</td>
+                        <td>40</td>
+                        <td>100%</td>
+                        <td>2025-01-15 13:20</td>
+                        <td><span class="status-badge status-passed">✓ Complete</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Access Control Notice -->
+        <div class="card mt-8 bg-gray-100">
+            <p class="font-semibold text-gray-800 mb-2">Access Control Policy</p>
+            <ul class="text-sm text-gray-700 space-y-1 list-disc list-inside">
+                <li>Grade records are displayed for oversight purposes only</li>
+                <li>You cannot edit, modify, or delete any grade records</li>
+                <li>To make changes to grades, contact the respective faculty member</li>
+                <li>All actions are logged and audited for compliance</li>
+            </ul>
+        </div>
+    </main>
+
+    <script>
+        // Check authentication
+        const role = checkAuth();
+        if (role !== ROLES.SUPERVISOR) {
+            window.location.href = 'index.html';
+        }
+
+        // Initialize page
+        document.getElementById('sidebar').innerHTML = getSidebarHTML(role, 'roster');
+        document.getElementById('header').innerHTML = getHeaderHTML(role);
+
+        // Disable any potential edit functionality
+        document.addEventListener('contextmenu', (e) => {
+            if (e.target.closest('table')) {
+                e.preventDefault();
+                showError('Editing is not allowed in this view');
+            }
+        });
+    </script>
+</body>
+</html>

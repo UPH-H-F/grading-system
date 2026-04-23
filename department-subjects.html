@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Department Subjects - UPHSD Grading System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="shared.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div id="sidebar"></div>
+    <div id="header"></div>
+
+    <main class="ml-64 mt-24 p-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-[#800000] mb-2">Department Subjects</h1>
+            <p class="text-gray-600 border-l-4 border-[#FFD700] pl-4">View and manage department course offerings</p>
+        </div>
+
+        <!-- Filter and Search -->
+        <div class="mb-6 flex gap-4 flex-wrap">
+            <input type="text" id="searchInput" placeholder="Search subjects..." class="focus-ring flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg">
+            <select id="statusFilter" class="focus-ring px-4 py-3 border-2 border-gray-300 rounded-lg">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+        </div>
+
+        <!-- Subjects Table -->
+        <div class="card overflow-x-auto">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Subject Code</th>
+                        <th>Subject Name</th>
+                        <th>Faculty</th>
+                        <th>Schedule</th>
+                        <th>Room</th>
+                        <th>Capacity</th>
+                        <th>Enrolled</th>
+                        <th>Semester</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="subjectTableBody">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Subject Statistics -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+            <div class="card">
+                <div class="text-3xl font-bold text-[#800000] mb-2">24</div>
+                <div class="card-title text-base">Total Subjects</div>
+                <p class="text-sm text-gray-600">Offered this semester</p>
+            </div>
+            <div class="card">
+                <div class="text-3xl font-bold text-[#800000] mb-2">487</div>
+                <div class="card-title text-base">Total Enrollment</div>
+                <p class="text-sm text-gray-600">Students across all subjects</p>
+            </div>
+            <div class="card">
+                <div class="text-3xl font-bold text-[#800000] mb-2">95%</div>
+                <div class="card-title text-base">Capacity Utilization</div>
+                <p class="text-sm text-gray-600">Average across all subjects</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Check authentication
+        const role = checkAuth();
+        if (role !== ROLES.SUPERVISOR) {
+            window.location.href = 'index.html';
+        }
+
+        // Initialize page
+        document.getElementById('sidebar').innerHTML = getSidebarHTML(role, 'depts');
+        document.getElementById('header').innerHTML = getHeaderHTML(role);
+
+        // Sample subject data
+        const subjects = [
+            {
+                code: 'HCI-1',
+                name: 'Human Computer Interaction 1',
+                faculty: 'Prof. Juan Dela Cruz',
+                schedule: 'MWF 10:00 AM - 11:30 AM',
+                room: 'Computer Lab 201',
+                capacity: 50,
+                enrolled: 42,
+                semester: '2025-2026',
+                status: 'active'
+            },
+            {
+                code: 'WEB-1',
+                name: 'Web Development Fundamentals',
+                faculty: 'Prof. Carlos Mendoza',
+                schedule: 'TTh 1:00 PM - 2:30 PM',
+                room: 'Computer Lab 301',
+                capacity: 50,
+                enrolled: 38,
+                semester: '2025-2026',
+                status: 'active'
+            },
+            {
+                code: 'DBS-1',
+                name: 'Database Management Systems',
+                faculty: 'Prof. Carlos Mendoza',
+                schedule: 'MWF 2:00 PM - 3:30 PM',
+                room: 'Computer Lab 102',
+                capacity: 50,
+                enrolled: 35,
+                semester: '2025-2026',
+                status: 'active'
+            },
+            {
+                code: 'SE-1',
+                name: 'Software Engineering',
+                faculty: 'Prof. Juan Dela Cruz',
+                schedule: 'TTh 3:00 PM - 4:30 PM',
+                room: 'Computer Lab 201',
+                capacity: 50,
+                enrolled: 41,
+                semester: '2025-2026',
+                status: 'active'
+            },
+            {
+                code: 'AI-1',
+                name: 'Artificial Intelligence Basics',
+                faculty: 'Dr. Patricia Reyes',
+                schedule: 'MWF 1:00 PM - 2:30 PM',
+                room: 'Computer Lab 305',
+                capacity: 45,
+                enrolled: 40,
+                semester: '2025-2026',
+                status: 'active'
+            },
+            {
+                code: 'DS-1',
+                name: 'Data Structures',
+                faculty: 'Dr. Patricia Reyes',
+                schedule: 'TTh 10:00 AM - 11:30 AM',
+                room: 'Computer Lab 102',
+                capacity: 50,
+                enrolled: 45,
+                semester: '2025-2026',
+                status: 'active'
+            },
+        ];
+
+        // Render subjects table
+        function renderSubjects(data = subjects) {
+            const tbody = document.getElementById('subjectTableBody');
+            tbody.innerHTML = data.map(subject => {
+                const utilizationPercent = Math.round((subject.enrolled / subject.capacity) * 100);
+                return `
+                    <tr>
+                        <td class="font-semibold text-[#800000]">${subject.code}</td>
+                        <td>${subject.name}</td>
+                        <td>${subject.faculty}</td>
+                        <td>${subject.schedule}</td>
+                        <td>${subject.room}</td>
+                        <td>${subject.capacity}</td>
+                        <td>${subject.enrolled} (${utilizationPercent}%)</td>
+                        <td>${subject.semester}</td>
+                        <td>
+                            <span class="status-badge ${subject.status === 'active' ? 'status-passed' : 'status-failed'}">
+                                ${subject.status === 'active' ? '✓ Active' : '✗ Inactive'}
+                            </span>
+                        </td>
+                        <td>
+                            <button onclick="viewDetails('${subject.code}')" class="text-[#800000] hover:underline font-semibold mr-2">View</button>
+                            <button onclick="unassignSubject('${subject.code}')" class="text-red-600 hover:underline font-semibold">Unassign</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function viewDetails(code) {
+            const subject = subjects.find(s => s.code === code);
+            if (subject) {
+                showConfirmation(
+                    subject.name,
+                    `Code: ${subject.code}\nFaculty: ${subject.faculty}\nSchedule: ${subject.schedule}\nCapacity: ${subject.capacity}\nEnrolled: ${subject.enrolled}`,
+                    () => {}
+                );
+            }
+        }
+
+        function unassignSubject(code) {
+            showConfirmation(
+                'Unassign Subject',
+                'Are you sure you want to unassign this subject?',
+                () => confirmUnassign(code)
+            );
+        }
+
+        function confirmUnassign(code) {
+            const index = subjects.findIndex(s => s.code === code);
+            if (index > -1) {
+                subjects.splice(index, 1);
+                renderSubjects();
+                showSuccess('Subject unassigned successfully!');
+            }
+        }
+
+        // Search and filter
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            const filtered = subjects.filter(subject => {
+                const matchSearch = subject.code.toLowerCase().includes(searchTerm) ||
+                                   subject.name.toLowerCase().includes(searchTerm) ||
+                                   subject.faculty.toLowerCase().includes(searchTerm);
+                const matchStatus = statusFilter === '' || subject.status === statusFilter;
+                return matchSearch && matchStatus;
+            });
+            
+            renderSubjects(filtered);
+        });
+
+        document.getElementById('statusFilter').addEventListener('change', (e) => {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = e.target.value;
+            
+            const filtered = subjects.filter(subject => {
+                const matchSearch = subject.code.toLowerCase().includes(searchTerm) ||
+                                   subject.name.toLowerCase().includes(searchTerm) ||
+                                   subject.faculty.toLowerCase().includes(searchTerm);
+                const matchStatus = statusFilter === '' || subject.status === statusFilter;
+                return matchSearch && matchStatus;
+            });
+            
+            renderSubjects(filtered);
+        });
+
+        // Initial render
+        renderSubjects();
+    </script>
+</body>
+</html>

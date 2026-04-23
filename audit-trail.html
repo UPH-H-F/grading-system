@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Trail - UPHSD Grading System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="shared.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div id="sidebar"></div>
+    <div id="header"></div>
+
+    <main class="ml-64 mt-24 p-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-[#800000] mb-2">Session & Audit Trail</h1>
+            <p class="text-gray-600 border-l-4 border-[#FFD700] pl-4">Read-only activity log of all system actions</p>
+        </div>
+
+        <!-- Filters -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div>
+                <label class="block text-gray-700 font-semibold mb-2">Filter by User</label>
+                <input type="text" id="userFilter" placeholder="Search user..." class="focus-ring w-full px-4 py-2 border-2 border-gray-300 rounded-lg">
+            </div>
+            <div>
+                <label class="block text-gray-700 font-semibold mb-2">Filter by Action</label>
+                <select id="actionFilter" class="focus-ring w-full px-4 py-2 border-2 border-gray-300 rounded-lg">
+                    <option value="">All Actions</option>
+                    <option value="login">Login</option>
+                    <option value="logout">Logout</option>
+                    <option value="create">Create</option>
+                    <option value="update">Update</option>
+                    <option value="delete">Delete</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-gray-700 font-semibold mb-2">Filter by Date</label>
+                <input type="date" id="dateFilter" class="focus-ring w-full px-4 py-2 border-2 border-gray-300 rounded-lg">
+            </div>
+        </div>
+
+        <!-- Audit Log Table -->
+        <div class="card overflow-x-auto">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Module</th>
+                        <th>Details</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="auditTableBody">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Export Options -->
+        <div class="mt-6 flex gap-4">
+            <button onclick="exportAuditLog('csv')" class="btn-primary">📥 Export as CSV</button>
+            <button onclick="exportAuditLog('pdf')" class="btn-primary">📄 Export as PDF</button>
+        </div>
+    </main>
+
+    <script>
+        // Check authentication
+        const role = checkAuth();
+        if (role !== ROLES.ADMIN) {
+            window.location.href = 'index.html';
+        }
+
+        // Initialize page
+        document.getElementById('sidebar').innerHTML = getSidebarHTML(role, 'audit');
+        document.getElementById('header').innerHTML = getHeaderHTML(role);
+
+        // Sample audit log data
+        const auditLog = [
+            { timestamp: '2025-01-15 14:32:15', user: 'Dr. Maria Santos', action: 'Create', module: 'User Management', details: 'Created new user: Prof. Carlos Mendoza', status: 'Success' },
+            { timestamp: '2025-01-15 14:15:42', user: 'Admin User', action: 'Update', module: 'User Management', details: 'Updated role for user: Prof. Juan Dela Cruz', status: 'Success' },
+            { timestamp: '2025-01-15 13:45:28', user: 'Prof. Juan Dela Cruz', action: 'Login', module: 'Authentication', details: 'User logged in from 192.168.1.100', status: 'Success' },
+            { timestamp: '2025-01-15 13:20:10', user: 'Dr. Patricia Reyes', action: 'Update', module: 'Grade Encoding', details: 'Updated grades for HCI-1 class', status: 'Success' },
+            { timestamp: '2025-01-15 12:50:55', user: 'Admin User', action: 'Delete', module: 'User Management', details: 'Deactivated user: Dr. Ana Garcia', status: 'Success' },
+            { timestamp: '2025-01-15 11:30:22', user: 'Prof. Carlos Mendoza', action: 'Login', module: 'Authentication', details: 'User logged in from 192.168.1.105', status: 'Success' },
+            { timestamp: '2025-01-15 10:15:45', user: 'Dr. Maria Santos', action: 'Update', module: 'System Configuration', details: 'Updated system settings', status: 'Success' },
+            { timestamp: '2025-01-14 16:45:30', user: 'System', action: 'Create', module: 'Backup', details: 'Automated backup completed successfully', status: 'Success' },
+            { timestamp: '2025-01-14 15:20:18', user: 'Prof. Juan Dela Cruz', action: 'Logout', module: 'Authentication', details: 'User logged out', status: 'Success' },
+            { timestamp: '2025-01-14 14:05:40', user: 'Dr. Patricia Reyes', action: 'Create', module: 'Subject Assignment', details: 'Assigned HCI-1 to Prof. Juan Dela Cruz', status: 'Success' },
+        ];
+
+        // Render audit log
+        function renderAuditLog(data = auditLog) {
+            const tbody = document.getElementById('auditTableBody');
+            tbody.innerHTML = data.map(log => `
+                <tr>
+                    <td>${log.timestamp}</td>
+                    <td>${log.user}</td>
+                    <td><span class="font-semibold text-[#800000]">${log.action}</span></td>
+                    <td>${log.module}</td>
+                    <td>${log.details}</td>
+                    <td><span class="status-badge status-passed">✓ ${log.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // Filter functionality
+        function applyFilters() {
+            const userFilter = document.getElementById('userFilter').value.toLowerCase();
+            const actionFilter = document.getElementById('actionFilter').value;
+            const dateFilter = document.getElementById('dateFilter').value;
+
+            const filtered = auditLog.filter(log => {
+                const matchUser = log.user.toLowerCase().includes(userFilter);
+                const matchAction = actionFilter === '' || log.action === actionFilter;
+                const matchDate = dateFilter === '' || log.timestamp.startsWith(dateFilter);
+                return matchUser && matchAction && matchDate;
+            });
+
+            renderAuditLog(filtered);
+        }
+
+        // Event listeners for filters
+        document.getElementById('userFilter').addEventListener('input', applyFilters);
+        document.getElementById('actionFilter').addEventListener('change', applyFilters);
+        document.getElementById('dateFilter').addEventListener('change', applyFilters);
+
+        // Export functionality
+        function exportAuditLog(format) {
+            showConfirmation(
+                'Export Audit Log',
+                `Are you sure you want to export the audit log as ${format.toUpperCase()}?`,
+                () => performExport(format)
+            );
+        }
+
+        function performExport(format) {
+            if (format === 'csv') {
+                let csv = 'Timestamp,User,Action,Module,Details,Status\n';
+                auditLog.forEach(log => {
+                    csv += `"${log.timestamp}","${log.user}","${log.action}","${log.module}","${log.details}","${log.status}"\n`;
+                });
+                downloadFile(csv, 'audit-log.csv', 'text/csv');
+            } else if (format === 'pdf') {
+                showSuccess('PDF export initiated. This would generate a PDF file in a production environment.');
+            }
+        }
+
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            showSuccess('Audit log exported successfully!');
+        }
+
+        // Initial render
+        renderAuditLog();
+    </script>
+</body>
+</html>

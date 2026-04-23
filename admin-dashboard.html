@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - UPHSD Grading System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="shared.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div id="sidebar"></div>
+    <div id="header"></div>
+
+    <main class="ml-64 mt-24 p-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-[#800000] mb-2">Admin Dashboard</h1>
+            <p class="text-gray-600 border-l-4 border-[#FFD700] pl-4">System overview and management controls</p>
+        </div>
+
+        <!-- Status Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="card">
+                <div class="text-4xl font-bold text-[#800000] mb-2">24</div>
+                <div class="card-title text-base">Total Users</div>
+                <p class="text-sm text-gray-600">Active accounts</p>
+            </div>
+            <div class="card">
+                <div class="text-4xl font-bold text-[#800000] mb-2">8</div>
+                <div class="card-title text-base">Faculty Members</div>
+                <p class="text-sm text-gray-600">Teaching staff</p>
+            </div>
+            <div class="card">
+                <div class="text-4xl font-bold text-[#800000] mb-2">3</div>
+                <div class="card-title text-base">Supervisors</div>
+                <p class="text-sm text-gray-600">Department heads</p>
+            </div>
+            <div class="card">
+                <div class="text-4xl font-bold text-[#800000] mb-2">2</div>
+                <div class="card-title text-base">Pending Alerts</div>
+                <p class="text-sm text-gray-600">Require attention</p>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="card">
+                <div class="card-title">Quick Actions</div>
+                <div class="space-y-3">
+                    <a href="create-user.html" class="block btn-primary text-center">➕ Create New User</a>
+                    <a href="user-management.html" class="block btn-primary text-center">👥 Manage Users</a>
+                    <a href="roles-privileges.html" class="block btn-primary text-center">🔐 View Roles & Privileges</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">System Status</div>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">Database</span>
+                        <span class="status-badge status-passed">✓ Online</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">API Server</span>
+                        <span class="status-badge status-passed">✓ Running</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">Backup Status</span>
+                        <span class="status-badge status-passed">✓ Current</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card">
+            <div class="card-title">Recent Activity</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>2025-01-15 14:32</td>
+                        <td>Dr. Maria Santos</td>
+                        <td>Created new user account</td>
+                        <td><span class="status-badge status-passed">Success</span></td>
+                    </tr>
+                    <tr>
+                        <td>2025-01-15 13:15</td>
+                        <td>Prof. Juan Dela Cruz</td>
+                        <td>Updated grade records</td>
+                        <td><span class="status-badge status-passed">Success</span></td>
+                    </tr>
+                    <tr>
+                        <td>2025-01-15 11:45</td>
+                        <td>Admin User</td>
+                        <td>Modified user roles</td>
+                        <td><span class="status-badge status-passed">Success</span></td>
+                    </tr>
+                    <tr>
+                        <td>2025-01-14 16:20</td>
+                        <td>System</td>
+                        <td>Automated backup completed</td>
+                        <td><span class="status-badge status-passed">Success</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        // Check authentication
+        const role = checkAuth();
+        if (role !== ROLES.ADMIN) {
+            window.location.href = 'index.html';
+        }
+
+        // Initialize page
+        document.getElementById('sidebar').innerHTML = getSidebarHTML(role, 'dashboard');
+        document.getElementById('header').innerHTML = getHeaderHTML(role);
+    </script>
+</body>
+</html>
